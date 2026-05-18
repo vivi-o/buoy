@@ -63,9 +63,9 @@ void setMotorSpeed(int channel, float speed) {
 void tftStatus(const char* line1, const char* line2 = "", uint16_t color = TFT_GREEN) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(color);
-  tft.setTextSize(2);
+  tft.setTextSize(3);
   tft.setCursor(4, 20); tft.println(line1);  
-  tft.setTextSize(1);
+  tft.setTextSize(2);
   tft.setCursor(4, 60); tft.println(line2);  
 }
 
@@ -84,10 +84,32 @@ void setup(){
   gpsSerial.begin(GPS_BAUD, SERIAL_8N1, RXD2, TXD2);
   Serial.println("Serial 2 started at 9600 baud rate");
 
-pca.begin();
-pca.setPWMFreq(50);
+
   // I2C setup for ESP32
   Wire.begin(21, 22);   // SDA = 21, SCL = 22
+
+  if(!pca.begin()) {
+    tftStatus("PWM FAIL", "Check wiring", TFT_RED);
+    Serial.print("Ooops, no PWM detected ... Check your wiring or I2C ADDR!");
+    while(1);    
+  }
+  pca.setPWMFreq(60);
+
+/*
+pca.setPWM(13, 0,500);
+pca.setPWM(14, 0,500);
+pca.setPWM(15, 0,500);
+tftStatus("Motors", "Setting to 100%", TFT_ORANGE);  
+delay(5000);
+*/
+
+pca.setPWM(13, 0,100);
+pca.setPWM(14, 0,100);
+pca.setPWM(15, 0,100);
+tftStatus("Motors", "Setting to 0", TFT_GREEN);  
+delay(5000);
+tftStatus("Motors", "OK", TFT_GREEN); 
+  delay(400);
 
   // Initialize IMU sensors
   /* Initialise the sensor */
@@ -105,11 +127,7 @@ pca.setPWMFreq(50);
 
 //setMotorSpeed(15, 0);
 
-pca.setPWM(14, 0, 0);
-pca.setPWM(15, 0,0);
 
-delay(5000);
-tftStatus("Motors", "OK", TFT_GREEN);  
 }
 
 double targetAngle = 0;
@@ -185,21 +203,30 @@ void loop(){
     rightSpeed  = constrain(BASE_SPEED + correction, 0, MAX_SPEED);
  // }
 
-  setMotorSpeed(14,  50);
+pca.setPWM(13, 0,500);
+pca.setPWM(14, 0,500);
+pca.setPWM(15, 0,500);
+
+  //setMotorSpeed(14,  50);
   Serial.print("left speed = "); 
   Serial.println(leftSpeed); 
-  setMotorSpeed(15, 50);
+  //setMotorSpeed(15, 50);
   Serial.print("right speed = "); 
   Serial.println(rightSpeed); 
- tftStatus("fifty", "bith", TFT_GREEN);
+ tftStatus("fifty", "200", TFT_GREEN);
  delay(5000);
- setMotorSpeed(14,  leftSpeed);
+
+pca.setPWM(13, 0,100);
+pca.setPWM(14, 0,100);
+pca.setPWM(15, 0,100);
+
+// setMotorSpeed(14,  leftSpeed);
   Serial.print("left speed = "); 
   Serial.println(leftSpeed); 
-  setMotorSpeed(15, rightSpeed);
+//  setMotorSpeed(15, rightSpeed);
   Serial.print("right speed = "); 
   Serial.println(rightSpeed); 
- tftStatus("normal", "bith", TFT_GREEN);
+ tftStatus("normal", "300", TFT_GREEN);
  delay(5000);
  /*
   setMotorSpeed(14,  100);
